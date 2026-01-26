@@ -9,20 +9,20 @@ interface StartScreenProps {
 export const StartScreen: React.FC<StartScreenProps> = ({ onStart, isLoading, error }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-full p-6 text-center max-w-2xl mx-auto">
-      <div className="mb-8">
-        <span className="text-6xl">🇩🇪</span>
+      <div className="mb-0 md:mb-8">
+        <span className="text-xl md:text-6xl">🇩🇪</span>
       </div>
-      <h1 className="text-4xl font-bold text-slate-800 mb-4">
+      <h1 className="text-lg md:text-4xl font-bold text-slate-800 mb-0.5 md:mb-4">
         Almanca İyelik Zamirleri Testi
       </h1>
-      <p className="text-lg text-slate-600 mb-8">
-        A2 seviyesinde 20 cümlelik bir alıştırma. 
+      <p className="text-sm md:text-lg text-slate-600 mb-3 md:mb-8">
+        A2 seviyesinde 20 cümlelik bir alıştırma.
         <br />
-        <span className="font-semibold text-green-600">Doğru: +10 Puan</span> | <span className="font-semibold text-red-500">Yanlış: -5 Puan</span>
+        <span className="font-semibold text-green-600 text-sm">Doğru: +10</span> | <span className="font-semibold text-red-500 text-sm">Yanlış: -5</span>
       </p>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 w-full">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 w-full text-sm">
           <p className="font-bold">Hata oluştu:</p>
           <p>{error}</p>
         </div>
@@ -31,11 +31,10 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart, isLoading, er
       <button
         onClick={onStart}
         disabled={isLoading}
-        className={`px-8 py-4 rounded-full text-xl font-semibold shadow-lg transition-all transform hover:scale-105 active:scale-95 ${
-          isLoading
-            ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-            : 'bg-indigo-600 text-white hover:bg-indigo-700'
-        }`}
+        className={`px-6 py-2 md:px-8 md:py-4 rounded-full text-lg md:text-xl font-semibold shadow-lg transition-all transform hover:scale-105 active:scale-95 ${isLoading
+          ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+          : 'bg-indigo-600 text-white hover:bg-indigo-700'
+          }`}
       >
         {isLoading ? (
           <div className="flex items-center gap-2">
@@ -49,7 +48,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart, isLoading, er
           'Alıştırmaya Başla'
         )}
       </button>
-      
+
       {!isLoading && (
         <p className="mt-4 text-sm text-slate-400">
           Sorular Google Gemini AI tarafından anlık olarak oluşturulur.
