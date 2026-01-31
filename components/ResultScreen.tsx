@@ -1,15 +1,15 @@
 import React from 'react';
-import { AnswerRecord } from '../types';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { useQuizStore, useQuizActions } from '../store/useQuizStore';
 
-interface ResultScreenProps {
-  score: number;
-  totalQuestions: number;
-  history: AnswerRecord[];
-  onRestart: () => void;
-}
+export const ResultScreen: React.FC = () => {
+  const score = useQuizStore(state => state.score);
+  const history = useQuizStore(state => state.history);
+  const questions = useQuizStore(state => state.questions);
 
-export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestions, history, onRestart }) => {
+  const { restartGame } = useQuizActions();
+
+  const totalQuestions = questions.length;
   const correctCount = history.filter(h => h.isCorrect).length;
   const incorrectCount = totalQuestions - correctCount;
 
@@ -34,34 +34,34 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
         <div className="bg-white p-6 rounded-xl shadow-sm text-center border border-slate-100">
           <div className="text-sm text-slate-500 uppercase font-semibold">Doğruluk Oranı</div>
           <div className="text-4xl font-bold text-slate-700">
-            {Math.round((correctCount / totalQuestions) * 100)}%
+            {totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0}%
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm text-center border border-slate-100 flex items-center justify-center">
-             <div className="w-full h-24">
-               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={data}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={25}
-                    outerRadius={40}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {data.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-             </div>
-             <div className="ml-4 text-left text-xs text-slate-500">
-                <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-400"></span> {correctCount} Doğru</div>
-                <div className="flex items-center gap-1 mt-1"><span className="w-2 h-2 rounded-full bg-red-400"></span> {incorrectCount} Yanlış</div>
-             </div>
+          <div className="w-full h-24">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={25}
+                  outerRadius={40}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="ml-4 text-left text-xs text-slate-500">
+            <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-400"></span> {correctCount} Doğru</div>
+            <div className="flex items-center gap-1 mt-1"><span className="w-2 h-2 rounded-full bg-red-400"></span> {incorrectCount} Yanlış</div>
+          </div>
         </div>
       </div>
 
@@ -72,7 +72,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
         </div>
         <div className="overflow-y-auto p-0">
           {history.length === 0 ? (
-             <p className="p-6 text-slate-500">Henüz kayıt yok.</p>
+            <p className="p-6 text-slate-500">Henüz kayıt yok.</p>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead className="bg-slate-50 text-slate-500 text-xs uppercase sticky top-0">
@@ -115,7 +115,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
 
       <div className="flex justify-center pb-8">
         <button
-          onClick={onRestart}
+          onClick={shuffleAndRestart}
           className="px-8 py-3 bg-indigo-600 text-white rounded-full font-bold shadow-lg hover:bg-indigo-700 transition-transform transform hover:-translate-y-1 active:translate-y-0"
         >
           Tekrar Oyna
@@ -123,4 +123,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
       </div>
     </div>
   );
+
+  function shuffleAndRestart() {
+    restartGame();
+  }
 };

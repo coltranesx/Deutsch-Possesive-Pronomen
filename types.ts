@@ -21,3 +21,5 @@ export enum GameState {
   FINISHED = 'FINISHED',
   ERROR = 'ERROR'
 }
+
+export type UserLevel = 'A2' | 'B1';

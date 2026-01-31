@@ -1,27 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Question } from '../types';
 import { playSuccessSound, playErrorSound } from '../utils/sound';
+import { useQuizStore, useQuizActions } from '../store/useQuizStore';
 
-interface QuizScreenProps {
-  question: Question;
-  currentIndex: number;
-  totalQuestions: number;
-  currentScore: number;
-  onRecordAnswer: (answer: string) => void;
-  onNextQuestion: () => void;
-}
+export const QuizScreen: React.FC = () => {
+  // Global State
+  const questions = useQuizStore(state => state.questions);
+  const currentQuestionIndex = useQuizStore(state => state.currentQuestionIndex);
+  const score = useQuizStore(state => state.score);
 
-export const QuizScreen: React.FC<QuizScreenProps> = ({
-  question,
-  currentIndex,
-  totalQuestions,
-  currentScore,
-  onRecordAnswer,
-  onNextQuestion
-}) => {
+  const { recordAnswer, nextQuestion } = useQuizActions();
+
+  // Local UI State
   const [inputValue, setInputValue] = useState('');
   const [feedbackState, setFeedbackState] = useState<'idle' | 'correct' | 'incorrect'>('idle');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const question = questions[currentQuestionIndex];
+  const totalQuestions = questions.length;
 
   useEffect(() => {
     // Reset state for new question
@@ -30,14 +25,16 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [question]);
+  }, [currentQuestionIndex]); // Depend on index instead of question object for stability
+
+  if (!question) return null; // Safety check
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // If we are already showing feedback, this button/enter acts as "Next"
     if (feedbackState !== 'idle') {
-      onNextQuestion();
+      nextQuestion();
       return;
     }
 
@@ -56,10 +53,10 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
     }
 
     // Inform parent to update score/history
-    onRecordAnswer(trimmedInput);
+    recordAnswer(trimmedInput);
   };
 
-  const progressPercentage = ((currentIndex) / totalQuestions) * 100;
+  const progressPercentage = ((currentQuestionIndex) / totalQuestions) * 100;
 
   // Dynamic styles based on feedback
   let inputBorderClass = "border-slate-300 focus:border-indigo-600 text-indigo-700 bg-slate-50";
@@ -76,13 +73,13 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
       <div className="flex justify-between items-center mb-2 md:mb-6 bg-white px-3 py-2 md:p-4 rounded-xl shadow-sm">
         <div className="flex items-center gap-2 md:gap-4 md:flex-col md:items-start">
           <span className="text-xs md:text-sm text-slate-500 font-bold uppercase tracking-wider">Soru</span>
-          <span className="text-base md:text-2xl font-bold text-slate-800">{currentIndex + 1} <span className="text-slate-400 text-xs md:text-lg">/ {totalQuestions}</span></span>
+          <span className="text-base md:text-2xl font-bold text-slate-800">{currentQuestionIndex + 1} <span className="text-slate-400 text-xs md:text-lg">/ {totalQuestions}</span></span>
         </div>
         <div className="h-6 w-px bg-slate-200 md:hidden mx-2"></div>
         <div className="flex items-center gap-2 md:gap-4 md:flex-col md:items-end">
           <span className="text-xs md:text-sm text-slate-500 font-bold uppercase tracking-wider">Puan</span>
-          <span className={`text-base md:text-2xl font-bold transition-colors duration-300 ${currentScore >= 0 ? 'text-indigo-600' : 'text-red-500'}`}>
-            {currentScore}
+          <span className={`text-base md:text-2xl font-bold transition-colors duration-300 ${score >= 0 ? 'text-indigo-600' : 'text-red-500'}`}>
+            {score}
           </span>
         </div>
       </div>
