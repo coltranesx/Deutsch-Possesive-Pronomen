@@ -2,9 +2,9 @@ export interface Question {
   id: number;
   preGap: string;    // Text before the input
   postGap: string;   // Text after the input
-  answer: string;    // The correct possessive pronoun
+  answer: string;    // The correct word (possessive pronoun or preposition)
   translation: string; // Turkish translation for context
-  hint?: string;     // Optional hint (e.g., "Nom. ich")
+  hint?: string;     // Optional hint (e.g., "Nom. ich" or "aus + Dativ")
 }
 
 export interface AnswerRecord {
@@ -23,3 +23,12 @@ export enum GameState {
 }
 
 export type UserLevel = 'A2' | 'B1';
+
+export type TopicId = 'possessivpronomen' | 'prepositionen';
+
+export interface Topic {
+  id: TopicId;
+  title: string;
+  description: string;
+  icon: string; // Emoji
+}

@@ -19,6 +19,11 @@ describe('Quiz Store', () => {
         expect(useQuizStore.getState().userLevel).toBe('B1');
     });
 
+    it('should update topic', () => {
+        useQuizStore.getState().actions.setTopic('prepositionen');
+        expect(useQuizStore.getState().selectedTopic).toBe('prepositionen');
+    });
+
     it('should reset state on restart', () => {
         // Manually set some state
         useQuizStore.setState({ score: 50, gameState: GameState.PLAYING });

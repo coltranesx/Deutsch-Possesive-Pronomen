@@ -9,6 +9,7 @@ vi.mock('../../store/useQuizStore', () => ({
         userLevel: 'A2',
         score: 100,
         gameState: GameState.PLAYING,
+        selectedTopic: 'possessivpronomen',
         actions: { restartGame: vi.fn() }
     }),
     useQuizActions: () => ({ restartGame: vi.fn() })

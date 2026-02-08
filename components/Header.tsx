@@ -1,16 +1,20 @@
 import React from 'react';
 import { useQuizStore, useQuizActions } from '../store/useQuizStore';
 import { GameState } from '../types';
-import { BookOpen, RefreshCw, Trophy, RotateCcw } from 'lucide-react';
+import { BookOpen, Trophy, RotateCcw } from 'lucide-react';
 import { Button } from './ui/Button';
+import { getTopicStrategy } from '../services/topics/registry';
 
 export const Header: React.FC = () => {
     const userLevel = useQuizStore(state => state.userLevel);
     const score = useQuizStore(state => state.score);
     const gameState = useQuizStore(state => state.gameState);
+    const selectedTopic = useQuizStore(state => state.selectedTopic);
 
     // We import actions but only use restartGame here
     const restartGame = useQuizStore(state => state.actions.restartGame);
+
+    const topicMetadata = getTopicStrategy(selectedTopic).metadata;
 
     const handleNewGame = () => {
         if (confirm('Yeni bir oyuna başlamak istediğine emin misin? Mevcut ilerlemen kaybolacak.')) {
@@ -21,12 +25,12 @@ export const Header: React.FC = () => {
     return (
         <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 py-3 px-4 md:px-6 flex justify-between items-center sticky top-0 z-50">
             <div className="flex items-center gap-2 md:gap-3">
-                <div className="bg-indigo-600 p-2 rounded-lg shadow-sm">
-                    <BookOpen className="w-5 h-5 text-white" />
+                <div className="bg-indigo-600 p-2 rounded-lg shadow-sm text-white">
+                    {topicMetadata.icon ? <span>{topicMetadata.icon}</span> : <BookOpen className="w-5 h-5" />}
                 </div>
                 <div>
                     <h1 className="font-bold text-lg md:text-xl text-slate-800 leading-none">Deutsch Meister</h1>
-                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Possessivpronomen</p>
+                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{topicMetadata.title}</p>
                 </div>
             </div>
 

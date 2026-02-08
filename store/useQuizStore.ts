@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Question, AnswerRecord, GameState, UserLevel } from '../types';
+import { Question, AnswerRecord, GameState, UserLevel, TopicId } from '../types';
 import { generateQuestions } from '../services/geminiService';
 
 interface QuizState {
@@ -9,6 +9,7 @@ interface QuizState {
     score: number;
     history: AnswerRecord[];
     userLevel: UserLevel;
+    selectedTopic: TopicId;
     gameState: GameState;
     error: string | null;
 
@@ -18,6 +19,7 @@ interface QuizState {
         recordAnswer: (userAnswer: string) => void;
         nextQuestion: () => void;
         setLevel: (level: UserLevel) => void;
+        setTopic: (topic: TopicId) => void;
     };
 }
 
@@ -29,6 +31,7 @@ export const useQuizStore = create<QuizState>()(
             score: 0,
             history: [],
             userLevel: 'A2',
+            selectedTopic: 'possessivpronomen', // Default topic
             gameState: GameState.IDLE,
             error: null,
 
@@ -36,9 +39,8 @@ export const useQuizStore = create<QuizState>()(
                 startGame: async () => {
                     set({ gameState: GameState.LOADING, error: null });
                     try {
-                        const { userLevel } = get();
-                        // @ts-ignore - generateQuestions will be updated to accept level
-                        const fetchedQuestions = await generateQuestions(userLevel);
+                        const { userLevel, selectedTopic } = get();
+                        const fetchedQuestions = await generateQuestions(userLevel, selectedTopic);
                         set({
                             questions: fetchedQuestions,
                             currentQuestionIndex: 0,
@@ -87,11 +89,15 @@ export const useQuizStore = create<QuizState>()(
                     }
                 },
                 setLevel: (level: UserLevel) => set({ userLevel: level }),
+                setTopic: (topic: TopicId) => set({ selectedTopic: topic }),
             }
         }),
         {
             name: 'deutsch-meister-storage',
-            partialize: (state) => ({ userLevel: state.userLevel }), // Persist only user level
+            partialize: (state) => ({
+                userLevel: state.userLevel,
+                selectedTopic: state.selectedTopic // Persist selected topic
+            }),
         }
     )
 );
