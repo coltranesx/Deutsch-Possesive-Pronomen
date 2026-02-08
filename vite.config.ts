@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -8,6 +9,11 @@ export default defineConfig(() => {
     define: {
       // Vercel'deki VITE_API_KEY değişkenini alıp kodun anlayacağı formata çevirir
       'process.env.API_KEY': JSON.stringify(process.env.VITE_API_KEY),
+    },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./src/setupTests.ts'],
     },
   };
 });
