@@ -24,11 +24,14 @@ export enum GameState {
 
 export type UserLevel = 'A2' | 'B1';
 
-export type TopicId = 'possessivpronomen' | 'prepositionen';
+export type TopicId = string;
+
+export type TopicCategory = 'Gramer' | 'Kelime Bilgisi' | 'Fiil Çekimi' | 'Okuma';
 
 export interface Topic {
   id: TopicId;
   title: string;
   description: string;
   icon: string; // Emoji
+  category?: TopicCategory;
 }

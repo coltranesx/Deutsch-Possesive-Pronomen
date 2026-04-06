@@ -12,59 +12,86 @@ export const StartScreen: React.FC = () => {
   const isLoading = gameState === 'LOADING';
 
   const { startGame, setLevel, setTopic } = useQuizActions();
-  const topics = getAllTopics();
+  const allTopics = getAllTopics();
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  const filteredTopics = allTopics.filter(t =>
+    t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Ensure a default topic is set (e.g., if persist hydration failed or first load)
   useEffect(() => {
-    if (!selectedTopic) {
-      setTopic('possessivpronomen');
+    if (!selectedTopic && allTopics.length > 0) {
+      setTopic(allTopics[0].id);
     }
-  }, [selectedTopic, setTopic]);
+  }, [selectedTopic, setTopic, allTopics]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full p-4 text-center max-w-4xl mx-auto">
-      <div className="mb-4 md:mb-8">
-        <span className="text-4xl md:text-7xl">🇩🇪</span>
+    <div className="flex flex-col items-center justify-center min-h-full p-4 text-center max-w-4xl mx-auto overflow-hidden">
+      <div className="mb-2 md:mb-4">
+        <span className="text-4xl md:text-6xl">🇩🇪</span>
       </div>
-      <h1 className="text-2xl md:text-5xl font-extrabold text-slate-800 mb-2 md:mb-6 tracking-tight">
-        Almanca Pratik
+      <h1 className="text-2xl md:text-4xl font-extrabold text-slate-800 mb-1 md:mb-2 tracking-tight">
+        Deutsch Meister AI
       </h1>
-      <p className="text-base md:text-xl text-slate-600 mb-6 md:mb-10 max-w-xl mx-auto leading-relaxed">
-        Kendini geliştirmek istediğin konuyu ve seviyeni seç, yapay zeka destekli alıştırmalarla Almancanı güçlendir.
+      <p className="text-sm md:text-base text-slate-600 mb-4 md:mb-6 max-w-xl mx-auto leading-relaxed">
+        Yapay zeka destekli alıştırmalarla Almancanı güçlendir.
       </p>
 
       {/* Main Selection Area */}
-      <div className="w-full grid md:grid-cols-2 gap-8 mb-8">
+      <div className="w-full grid md:grid-cols-2 gap-4 md:gap-8 mb-6">
 
         {/* 1. Topic Selection */}
-        <div className="flex flex-col gap-4">
-          <h2 className="text-lg font-bold text-slate-700 text-left pl-1">1. Konu Seç</h2>
-          <div className="grid grid-cols-1 gap-3">
-            {topics.map((topic) => (
-              <button
-                key={topic.id}
-                onClick={() => setTopic(topic.id)}
-                className={`relative flex items-center p-4 rounded-xl border-2 transition-all text-left group ${selectedTopic === topic.id
-                    ? 'border-indigo-600 bg-indigo-50 shadow-md ring-2 ring-indigo-200 ring-offset-2'
-                    : 'border-slate-200 bg-white hover:border-indigo-300 hover:shadow-sm'
-                  }`}
-              >
-                <div className="text-3xl mr-4 group-hover:scale-110 transition-transform duration-200">{topic.icon}</div>
-                <div className="flex-1">
-                  <h3 className={`font-bold text-lg ${selectedTopic === topic.id ? 'text-indigo-900' : 'text-slate-800'}`}>
-                    {topic.title}
-                  </h3>
-                  <p className={`text-sm ${selectedTopic === topic.id ? 'text-indigo-700/80' : 'text-slate-500'}`}>
-                    {topic.description}
-                  </p>
-                </div>
-                {selectedTopic === topic.id && (
-                  <div className="bg-indigo-600 text-white p-1 rounded-full absolute top-3 right-3 shadow-sm">
-                    <Check size={14} strokeWidth={3} />
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-lg font-bold text-slate-700">1. Konu Seç</h2>
+            <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+              {filteredTopics.length} Konu
+            </span>
+          </div>
+
+          <input
+            type="text"
+            placeholder="Konu ara... (örn: Edatlar)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100/50 outline-none text-sm transition-all shadow-sm"
+          />
+
+          <div className="grid grid-cols-1 gap-2.5 max-h-[320px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+            {filteredTopics.length > 0 ? (
+              filteredTopics.map((topic) => (
+                <button
+                  key={topic.id}
+                  onClick={() => setTopic(topic.id)}
+                  className={`relative flex items-center p-3.5 rounded-xl border-2 transition-all text-left group ${selectedTopic === topic.id
+                      ? 'border-indigo-600 bg-indigo-50 shadow-md ring-2 ring-indigo-200 ring-offset-1'
+                      : 'border-slate-200 bg-white hover:border-indigo-300 hover:shadow-sm'
+                    }`}
+                >
+                  <div className="text-2xl mr-3 group-hover:scale-110 transition-transform duration-200">{topic.icon}</div>
+                  <div className="flex-1">
+                    <h3 className={`font-bold text-base leading-tight ${selectedTopic === topic.id ? 'text-indigo-900' : 'text-slate-800'}`}>
+                      {topic.title}
+                    </h3>
+                    <p className={`text-xs mt-0.5 ${selectedTopic === topic.id ? 'text-indigo-700/80' : 'text-slate-500'}`}>
+                      {topic.description}
+                    </p>
                   </div>
-                )}
-              </button>
-            ))}
+                  {selectedTopic === topic.id && (
+                    <div className="bg-indigo-600 text-white p-1 rounded-full absolute top-2 right-2 shadow-sm scale-75 md:scale-90">
+                      <Check size={14} strokeWidth={3} />
+                    </div>
+                  )}
+                </button>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center p-8 text-slate-400 border-2 border-dashed border-slate-100 rounded-2xl">
+                <span className="text-3xl mb-2">🔍</span>
+                <p className="text-sm font-medium">Aradığınız konu bulunamadı.</p>
+              </div>
+            )}
           </div>
         </div>
 

@@ -2,10 +2,12 @@ import { TopicId } from '../../types';
 import { TopicStrategy } from './types';
 import { possessivpronomenStrategy } from './possessivpronomen';
 import { prepositionenStrategy } from './prepositionen';
+import { adjektivdeklinationStrategy } from './adjektivdeklination';
 
 export const topicRegistry: Record<TopicId, TopicStrategy> = {
     'possessivpronomen': possessivpronomenStrategy,
     'prepositionen': prepositionenStrategy,
+    'adjektivdeklination': adjektivdeklinationStrategy,
 };
 
 export const getTopicStrategy = (id: TopicId): TopicStrategy => {

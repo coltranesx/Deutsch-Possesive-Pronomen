@@ -7,7 +7,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "release": "node scripts/release.js"
+    "release": "node scripts/release.js",
+    "analyze": "node scripts/analyze_architecture.cjs",
+    "create-topic": "node scripts/create_topic.cjs"
   },
   "dependencies": {
     "@google/genai": "^1.38.0",
