@@ -1,11 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
-import { possessivpronomenStrategy } from '../services/topics/possessivpronomen';
-import { prepositionenStrategy } from '../services/topics/prepositionen';
-import { adjektivdeklinationStrategy } from '../services/topics/adjektivdeklination';
-import { TopicStrategy } from '../services/topics/types';
-import { UserLevel, TopicId } from '../types';
 
-// Vercel Serverless Function types (simplified to avoid 'any')
+// 1. Standalone Types - No relative imports to avoid Vercel ESM errors
+type UserLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
+type TopicId = 'possessivpronomen' | 'prepositionen' | 'adjektivdeklination';
+
 interface VercelRequest {
   method: string;
   body: {
@@ -19,76 +17,99 @@ interface VercelResponse {
   json: (data: unknown) => VercelResponse;
 }
 
-const topicRegistry: Record<string, TopicStrategy> = {
-  'possessivpronomen': possessivpronomenStrategy,
-  'prepositionen': prepositionenStrategy,
-  'adjektivdeklination': adjektivdeklinationStrategy,
+// 2. Embedded Prompt Logic - Zero external dependencies
+const getPromptForTopic = (topicId: TopicId, level: UserLevel): string => {
+  const commonRules = `
+    Genel Kurallar:
+    - Her seferinde FARKLI cümle yapıları ve kelimeler kullan. 
+    - Cümleler doğal ve günlük hayattan olsun.
+    - SADECE BİR boşluk bırak.
+    - Boşluk kısmına gelecek cevap (etiket) SADECE hedef dilbilgisi birimi olsun.
+  `;
+
+  if (topicId === 'possessivpronomen') {
+    const topics = ["Seyahat", "İş Hayatı", "Günlük Rutin", "Alışveriş", "Sağlık", "Teknoloji", "Aile", "Yemek"];
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+    if (level === 'A2') {
+      return `Konu: ${randomTopic}. A2 seviyesi "Possessivpronomen" (İyelik Zamirleri) 20 alıştırma. ${commonRules} Nominativ, Akkusativ, Dativ dengeli olsun.`;
+    }
+    return `Konu: ${randomTopic}. B1 seviyesi "Possessivpronomen" 20 ZORLU alıştırma. ${commonRules} Yan cümleler ve Genitiv dahil et.`;
+  }
+
+  if (topicId === 'prepositionen') {
+    const topics = ["Yön Bulma", "Seyahat", "Ulaşım", "Konum", "Toplantılar", "Tatil"];
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+    if (level === 'A2') {
+      return `Konu: ${randomTopic}. A2 seviyesi "Präpositionen mit Dativ" ve "Wechselpräpositionen" 20 alıştırma. ${commonRules} aus, bei, mit, nach, von, zu, in, an, auf, unter vb. kullan.`;
+    }
+    return `Konu: ${randomTopic}. B1 seviyesi "Präpositionen" (Genitiv dahil) 20 ZORLU alıştırma. ${commonRules} wegen, trotz, während, anstatt (Genitiv) dahil olsun.`;
+  }
+
+  if (topicId === 'adjektivdeklination') {
+    const topics = ["Moda", "Ev Arayışı", "Restoran", "Hava Durumu", "İnsan Tanımlama"];
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+    if (level === 'A2') {
+      return `Konu: ${randomTopic}. A2 seviyesi "Adjektivdeklination" (Sıfat Çekimleri) 20 alıştırma. ${commonRules} Belirli, belirsiz ve artikelsiz çekimleri dengeli dağıt.`;
+    }
+    return `Konu: ${randomTopic}. B1 seviyesi "Adjektivdeklination" 20 ZORLU alıştırma. ${commonRules} Genitiv çekimlerini (des/der + -en) mutlaka dahil et.`;
+  }
+
+  return "";
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // 1. Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { level, topicId } = req.body;
+  const { level = 'A2', topicId = 'possessivpronomen' } = req.body;
 
-  // 2. Validate inputs
-  if (!level || !topicId) {
-    return res.status(400).json({ error: 'Missing level or topicId' });
-  }
-
-  const strategy = topicRegistry[topicId];
-  if (!strategy) {
-    return res.status(404).json({ error: 'Topic not found' });
-  }
-
-  // 3. Get API Key from Environment
-  const apiKey = process.env.VITE_API_KEY || process.env.API_KEY;
+  // 3. API Key from Environment
+  const apiKey = process.env.VITE_API_KEY;
   if (!apiKey) {
-    console.error("API Key not found in Environment Variables.");
+    console.error("Critical Error: VITE_API_KEY missing in Vercel settings.");
     return res.status(500).json({ error: 'Server Configuration Error' });
   }
 
-  // @google/genai usage pattern
   const genAI = new GoogleGenAI({ apiKey });
-
-  const levelPrompt = strategy.getPrompt(level);
+  const levelPrompt = getPromptForTopic(topicId as TopicId, level as UserLevel);
 
   const prompt = `
     Sen uzman bir Almanca öğretmenisin.
     ${levelPrompt}
-    Genel Kurallar:
-    1. Hedef kelime dışında farklı bir kelime BOŞLUK OLAMAZ.
-    2. Cevap SADECE hedef kelime olmalı (iyelik zamiri, edat veya sıfat çekimi).
-    3. Türkçe çevirisini ekle.
-    4. İpucu mutlaka dilbilgisi kuralını (Kasus) belirtmeli.
+    Mecburi Çıktı Formatı (SADECE JSON):
+    1. Boşluk olan yer iyelik zamiri, edat veya sıfat çekimi olmalı.
+    2. Türkçe çevirisini ekle.
+    3. İpucu mutlaka Kasus belirtmeli.
     
-    Çıktıyı kesinlikle belirtilen JSON formatında bir liste (Array) olarak ver.
-    Örnek yapı: [{"id": 1, "preGap": "Das ist ", "postGap": " Buch.", "answer": "mein", "translation": "Bu benim kitabım.", "hint": "ich (Nominativ)"}]
+    JSON Liste (Array) olarak ver: [{"id": 1, "preGap": "Das ist ", "postGap": " Buch.", "answer": "mein", "translation": "Bu benim kitabım.", "hint": "ich (Nominativ)"}]
+    Not: Markdown backticks (\`\`\`) veya açıklama istemiyorum. SADECE saf JSON.
   `;
 
   try {
     const result = await genAI.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-      }
+      config: { responseMimeType: "application/json" }
     });
 
-    const text = result.text;
-    if (!text) {
-      throw new Error("No text returned from Gemini");
+    let text = result.text;
+    if (!text) throw new Error("API returned empty text");
+
+    // Clean JSON markdown if any
+    text = text.trim();
+    if (text.startsWith('```')) {
+      text = text.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
     }
     
-    // Parse to ensure it's valid JSON before sending
     const data = JSON.parse(text);
     return res.status(200).json(data);
 
-  } catch (error) {
-    console.error("Gemini API Error in Serverless Function:", error);
-    return res.status(500).json({ error: 'Failed to generate content' });
+  } catch (error: any) {
+    console.error("Gemini Lambda Error:", error?.message || error);
+    return res.status(500).json({ 
+      error: 'Generation failed', 
+      details: error?.message || 'Unknown error'
+    });
   }
 }
-
