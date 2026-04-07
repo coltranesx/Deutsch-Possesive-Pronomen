@@ -87,9 +87,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   `;
 
   try {
-    // gemini-1.5-flash-latest is available for all API keys on v1beta
+    // gemini-2.0-flash-001 is the stable alias for new API keys
     const model = genAI.getGenerativeModel(
-      { model: "gemini-1.5-flash-latest" },
+      { model: "gemini-2.0-flash-001" },
       { apiVersion: "v1beta" }
     );
     const result = await model.generateContent(prompt);
