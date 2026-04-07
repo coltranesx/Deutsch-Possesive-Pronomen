@@ -19,7 +19,8 @@ export const generateQuestions = async (level: UserLevel = 'A2', topicId: TopicI
     });
 
     if (!response.ok) {
-      console.warn("API proxy returned error, using fallback data.");
+      const errorData = await response.json().catch(() => ({}));
+      console.error("API proxy returned error:", response.status, errorData);
       return strategy.getFallbackQuestions(level);
     }
 
