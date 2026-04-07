@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // 1. Standalone Types - No relative imports to avoid Vercel ESM errors
 type UserLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
@@ -71,7 +71,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Server Configuration Error' });
   }
 
-  const genAI = new GoogleGenAI({ apiKey });
+  const genAI = new GoogleGenerativeAI(apiKey);
   const levelPrompt = getPromptForTopic(topicId as TopicId, level as UserLevel);
 
   const prompt = `
@@ -87,13 +87,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   `;
 
   try {
-    const result = await genAI.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: prompt,
-      config: { responseMimeType: "application/json" }
-    });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(prompt);
 
-    let text = result.text;
+    let text = result.response.text();
     if (!text) throw new Error("API returned empty text");
 
     // Clean JSON markdown if any
