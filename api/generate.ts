@@ -2,15 +2,30 @@ import { GoogleGenAI } from "@google/genai";
 import { possessivpronomenStrategy } from '../services/topics/possessivpronomen';
 import { prepositionenStrategy } from '../services/topics/prepositionen';
 import { adjektivdeklinationStrategy } from '../services/topics/adjektivdeklination';
+import { TopicStrategy } from '../services/topics/types';
+import { UserLevel, TopicId } from '../types';
 
-// Vercel Serverless Function helper
-const topicRegistry: any = {
+// Vercel Serverless Function types (simplified to avoid 'any')
+interface VercelRequest {
+  method: string;
+  body: {
+    level?: UserLevel;
+    topicId?: TopicId;
+  };
+}
+
+interface VercelResponse {
+  status: (code: number) => VercelResponse;
+  json: (data: unknown) => VercelResponse;
+}
+
+const topicRegistry: Record<string, TopicStrategy> = {
   'possessivpronomen': possessivpronomenStrategy,
   'prepositionen': prepositionenStrategy,
   'adjektivdeklination': adjektivdeklinationStrategy,
 };
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 1. Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
@@ -35,13 +50,8 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: 'Server Configuration Error' });
   }
 
-  const genAI = new GoogleGenAI(apiKey);
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-    }
-  });
+  // @google/genai usage pattern
+  const genAI = new GoogleGenAI({ apiKey });
 
   const levelPrompt = strategy.getPrompt(level);
 
@@ -59,9 +69,18 @@ export default async function handler(req: any, res: any) {
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      }
+    });
+
+    const text = result.text;
+    if (!text) {
+      throw new Error("No text returned from Gemini");
+    }
     
     // Parse to ensure it's valid JSON before sending
     const data = JSON.parse(text);
@@ -72,3 +91,4 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: 'Failed to generate content' });
   }
 }
+

@@ -28,16 +28,18 @@ export const StartScreen: React.FC = () => {
   }, [selectedTopic, setTopic, allTopics]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full p-4 text-center max-w-4xl mx-auto overflow-hidden">
-      <div className="mb-2 md:mb-4">
+    <div className="flex flex-col items-center justify-center min-h-full p-4 text-center max-w-4xl mx-auto overflow-hidden relative">
+      
+      <div className="mb-2 md:mb-4 pt-4 md:pt-0">
         <span className="text-4xl md:text-6xl">🇩🇪</span>
       </div>
-      <h1 className="text-2xl md:text-4xl font-extrabold text-slate-800 mb-1 md:mb-2 tracking-tight">
+      <h1 className="text-2xl md:text-4xl font-extrabold text-slate-800 dark:text-slate-100 mb-1 md:mb-2 tracking-tight transition-colors">
         Deutsch Meister AI
       </h1>
-      <p className="text-sm md:text-base text-slate-600 mb-4 md:mb-6 max-w-xl mx-auto leading-relaxed">
+      <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 mb-4 md:mb-6 max-w-xl mx-auto leading-relaxed transition-colors">
         Yapay zeka destekli alıştırmalarla Almancanı güçlendir.
       </p>
+
 
       {/* Main Selection Area */}
       <div className="w-full grid md:grid-cols-2 gap-4 md:gap-8 mb-6">
@@ -45,8 +47,8 @@ export const StartScreen: React.FC = () => {
         {/* 1. Topic Selection */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-lg font-bold text-slate-700">1. Konu Seç</h2>
-            <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 transition-colors">1. Konu Seç</h2>
+            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full transition-colors">
               {filteredTopics.length} Konu
             </span>
           </div>
@@ -56,26 +58,26 @@ export const StartScreen: React.FC = () => {
             placeholder="Konu ara... (örn: Edatlar)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100/50 outline-none text-sm transition-all shadow-sm"
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100/50 dark:focus:ring-indigo-900/50 outline-none text-sm transition-all shadow-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
 
-          <div className="grid grid-cols-1 gap-2.5 max-h-[320px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+          <div className="grid grid-cols-1 gap-2.5 max-h-[320px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
             {filteredTopics.length > 0 ? (
               filteredTopics.map((topic) => (
                 <button
                   key={topic.id}
                   onClick={() => setTopic(topic.id)}
                   className={`relative flex items-center p-3.5 rounded-xl border-2 transition-all text-left group ${selectedTopic === topic.id
-                      ? 'border-indigo-600 bg-indigo-50 shadow-md ring-2 ring-indigo-200 ring-offset-1'
-                      : 'border-slate-200 bg-white hover:border-indigo-300 hover:shadow-sm'
+                      ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 shadow-md ring-2 ring-indigo-200 dark:ring-indigo-800 ring-offset-1 dark:ring-offset-slate-900'
+                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm'
                     }`}
                 >
                   <div className="text-2xl mr-3 group-hover:scale-110 transition-transform duration-200">{topic.icon}</div>
                   <div className="flex-1">
-                    <h3 className={`font-bold text-base leading-tight ${selectedTopic === topic.id ? 'text-indigo-900' : 'text-slate-800'}`}>
+                    <h3 className={`font-bold text-base leading-tight transition-colors ${selectedTopic === topic.id ? 'text-indigo-900 dark:text-indigo-300' : 'text-slate-800 dark:text-slate-200'}`}>
                       {topic.title}
                     </h3>
-                    <p className={`text-xs mt-0.5 ${selectedTopic === topic.id ? 'text-indigo-700/80' : 'text-slate-500'}`}>
+                    <p className={`text-xs mt-0.5 transition-colors ${selectedTopic === topic.id ? 'text-indigo-700/80 dark:text-indigo-400/80' : 'text-slate-500 dark:text-slate-400'}`}>
                       {topic.description}
                     </p>
                   </div>
@@ -87,7 +89,7 @@ export const StartScreen: React.FC = () => {
                 </button>
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center p-8 text-slate-400 border-2 border-dashed border-slate-100 rounded-2xl">
+              <div className="flex flex-col items-center justify-center p-8 text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-100 dark:border-slate-700 rounded-2xl">
                 <span className="text-3xl mb-2">🔍</span>
                 <p className="text-sm font-medium">Aradığınız konu bulunamadı.</p>
               </div>
@@ -97,21 +99,21 @@ export const StartScreen: React.FC = () => {
 
         {/* 2. Level Selection */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-lg font-bold text-slate-700 text-left pl-1">2. Seviye Seç</h2>
+          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 text-left pl-1 transition-colors">2. Seviye Seç</h2>
           <div className="flex gap-3 h-full">
             {(['A2', 'B1'] as UserLevel[]).map((level) => (
               <button
                 key={level}
                 onClick={() => setLevel(level)}
                 className={`flex-1 rounded-xl border-2 flex flex-col items-center justify-center p-6 transition-all ${userLevel === level
-                    ? 'border-indigo-600 bg-indigo-50 shadow-md ring-2 ring-indigo-200 ring-offset-2'
-                    : 'border-slate-200 bg-white hover:border-indigo-300 hover:shadow-sm'
+                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 shadow-md ring-2 ring-indigo-200 dark:ring-indigo-800 ring-offset-2 dark:ring-offset-slate-900'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm'
                   }`}
               >
-                <span className={`text-3xl font-black mb-2 ${userLevel === level ? 'text-indigo-600' : 'text-slate-300'}`}>
+                <span className={`text-3xl font-black mb-2 transition-colors ${userLevel === level ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-300 dark:text-slate-600'}`}>
                   {level}
                 </span>
-                <span className={`text-sm font-semibold ${userLevel === level ? 'text-indigo-800' : 'text-slate-500'}`}>
+                <span className={`text-sm font-semibold transition-colors ${userLevel === level ? 'text-indigo-800 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400'}`}>
                   {level === 'A2' ? 'Temel - Orta' : 'Orta - İleri'}
                 </span>
               </button>
@@ -121,7 +123,7 @@ export const StartScreen: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 w-full max-w-2xl text-sm flex items-start gap-3 text-left">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg mb-6 w-full max-w-2xl text-sm flex items-start gap-3 text-left">
           <span className="text-xl">⚠️</span>
           <div>
             <p className="font-bold">Bir hata oluştu:</p>
