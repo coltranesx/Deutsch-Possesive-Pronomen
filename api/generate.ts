@@ -87,7 +87,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   `;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // gemini-pro is stable under v1 API
+    const model = genAI.getGenerativeModel(
+      { model: "gemini-pro" },
+      { apiVersion: "v1" }
+    );
     const result = await model.generateContent(prompt);
 
     let text = result.response.text();
