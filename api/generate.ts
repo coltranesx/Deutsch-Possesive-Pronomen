@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// Standalone Serverless Function - zero external dependencies except @google/generative-ai
 
 // 1. Standalone Types - No relative imports to avoid Vercel ESM errors
 type UserLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
@@ -71,7 +71,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Server Configuration Error' });
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
   const levelPrompt = getPromptForTopic(topicId as TopicId, level as UserLevel);
 
   const prompt = `
@@ -87,14 +86,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   `;
 
   try {
-    // gemini-2.0-flash-001 is the stable alias for new API keys
-    const model = genAI.getGenerativeModel(
-      { model: "gemini-2.0-flash-001" },
-      { apiVersion: "v1beta" }
+    // Direct REST call — avoids SDK version/alias confusion
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: 'application/json' }
+        })
+      }
     );
-    const result = await model.generateContent(prompt);
 
-    let text = result.response.text();
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Gemini API ${response.status}: ${errorBody}`);
+    }
+
+    const geminiData = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+    let text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
     if (!text) throw new Error("API returned empty text");
 
     // Clean JSON markdown if any
