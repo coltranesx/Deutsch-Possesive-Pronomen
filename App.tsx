@@ -22,12 +22,12 @@ export default function App() {
   }, [isDarkMode]);
 
   return (
-    <div className="h-full w-full bg-slate-50 dark:bg-slate-900 flex flex-col transition-colors duration-300">
+    <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-900 flex flex-col transition-colors duration-300">
       {/* Header / Brand */}
       <Header />
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto relative">
+      <main className="flex-1 relative">
         {gameState === GameState.IDLE || gameState === GameState.LOADING ? (
           <StartScreen />
         ) : gameState === GameState.PLAYING ? (

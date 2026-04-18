@@ -67,7 +67,7 @@ export const QuizScreen: React.FC = () => {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-2 md:p-4 flex flex-col h-full justify-start pt-2 md:justify-center">
+    <div className="w-full max-w-3xl mx-auto p-3 md:p-4 pb-16 flex flex-col justify-start md:justify-center min-h-[85vh]">
       {/* Top Bar */}
       {/* Top Bar - Super Compact Row */}
       <div className="flex justify-between items-center mb-2 md:mb-6 bg-white dark:bg-slate-800/50 px-3 py-2 md:p-4 rounded-xl shadow-sm transition-colors border border-transparent dark:border-slate-700/50">

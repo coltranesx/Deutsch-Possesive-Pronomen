@@ -28,7 +28,7 @@ export const StartScreen: React.FC = () => {
   }, [selectedTopic, setTopic, allTopics]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full p-4 text-center max-w-4xl mx-auto overflow-hidden relative">
+    <div className="flex flex-col items-center justify-start md:justify-center pt-8 pb-16 px-4 md:py-12 text-center max-w-4xl mx-auto relative w-full h-full md:h-auto">
       
       <div className="mb-2 md:mb-4 pt-4 md:pt-0">
         <span className="text-4xl md:text-6xl">🇩🇪</span>
@@ -61,7 +61,7 @@ export const StartScreen: React.FC = () => {
             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100/50 dark:focus:ring-indigo-900/50 outline-none text-sm transition-all shadow-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
 
-          <div className="grid grid-cols-1 gap-2.5 max-h-[320px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
+          <div className="grid grid-cols-1 gap-2.5 max-h-52 md:max-h-[320px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent overscroll-contain">
             {filteredTopics.length > 0 ? (
               filteredTopics.map((topic) => (
                 <button
