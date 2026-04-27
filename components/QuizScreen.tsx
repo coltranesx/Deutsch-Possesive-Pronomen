@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { playSuccessSound, playErrorSound } from '../utils/sound';
+import { playSuccessSound, playErrorSound, playHintSound } from '../utils/sound';
 import { useQuizStore, useQuizActions } from '../store/useQuizStore';
 
 export const QuizScreen: React.FC = () => {
@@ -7,12 +7,14 @@ export const QuizScreen: React.FC = () => {
   const questions = useQuizStore(state => state.questions);
   const currentQuestionIndex = useQuizStore(state => state.currentQuestionIndex);
   const score = useQuizStore(state => state.score);
+  const currentHintsUsed = useQuizStore(state => state.currentHintsUsed);
 
-  const { recordAnswer, nextQuestion } = useQuizActions();
+  const { recordAnswer, nextQuestion, useHint } = useQuizActions();
 
   // Local UI State
   const [inputValue, setInputValue] = useState('');
   const [feedbackState, setFeedbackState] = useState<'idle' | 'correct' | 'incorrect'>('idle');
+  const [floatingPenalty, setFloatingPenalty] = useState<1 | 2 | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const question = questions[currentQuestionIndex];
@@ -56,6 +58,14 @@ export const QuizScreen: React.FC = () => {
     recordAnswer(trimmedInput);
   };
 
+  const handleUseHint = (type: 1 | 2) => {
+    if (feedbackState !== 'idle') return;
+    useHint(type);
+    playHintSound();
+    setFloatingPenalty(type);
+    setTimeout(() => setFloatingPenalty(null), 800);
+  };
+
   const progressPercentage = ((currentQuestionIndex) / totalQuestions) * 100;
 
   // Dynamic styles based on feedback
@@ -91,6 +101,77 @@ export const QuizScreen: React.FC = () => {
           style={{ width: `${progressPercentage}%` }}
         ></div>
       </div>
+      {/* Hint Buttons */}
+      <div className="flex gap-2 md:gap-4 mb-4 min-h-[40px]">
+        {feedbackState === 'idle' ? (
+          <>
+            <div className="relative flex-1">
+              <button
+                type="button"
+                onClick={() => handleUseHint(1)}
+                disabled={currentHintsUsed.hint1}
+                className={`w-full py-2 px-3 rounded-lg text-xs md:text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 relative overflow-visible ${
+                  currentHintsUsed.hint1
+                    ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'
+                }`}
+              >
+                <span>💡 İpucu 1</span>
+                {!currentHintsUsed.hint1 && <span className="text-[10px] md:text-xs opacity-80">(-3 Puan)</span>}
+              </button>
+              {floatingPenalty === 1 && (
+                <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-red-500 font-bold animate-float-up pointer-events-none">
+                  -3
+                </span>
+              )}
+              {currentHintsUsed.hint1 && (
+                <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-xs md:text-sm rounded-lg border border-amber-100 dark:border-amber-900/30 animate-fade-in-down">
+                  {question.hint1}
+                </div>
+              )}
+            </div>
+
+            <div className="relative flex-1">
+              <button
+                type="button"
+                onClick={() => handleUseHint(2)}
+                disabled={currentHintsUsed.hint2}
+                className={`w-full py-2 px-3 rounded-lg text-xs md:text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 relative overflow-visible ${
+                  currentHintsUsed.hint2
+                    ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'
+                }`}
+              >
+                <span>🔍 İpucu 2</span>
+                {!currentHintsUsed.hint2 && <span className="text-[10px] md:text-xs opacity-80">(-3 Puan)</span>}
+              </button>
+              {floatingPenalty === 2 && (
+                <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-red-500 font-bold animate-float-up pointer-events-none">
+                  -3
+                </span>
+              )}
+              {currentHintsUsed.hint2 && (
+                <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-xs md:text-sm rounded-lg border border-amber-100 dark:border-amber-900/30 animate-fade-in-down">
+                  {question.hint2}
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {currentHintsUsed.hint1 && (
+              <div className="flex-1 p-2 bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs md:text-sm rounded-lg opacity-80 border border-transparent dark:border-slate-700">
+                <span className="font-bold">İpucu 1:</span> {question.hint1}
+              </div>
+            )}
+            {currentHintsUsed.hint2 && (
+              <div className="flex-1 p-2 bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs md:text-sm rounded-lg opacity-80 border border-transparent dark:border-slate-700">
+                <span className="font-bold">İpucu 2:</span> {question.hint2}
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Question Card */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-4 md:p-12 mb-3 md:mb-8 relative overflow-hidden transition-all duration-300 border border-transparent dark:border-slate-700">
@@ -98,10 +179,6 @@ export const QuizScreen: React.FC = () => {
         <div className={`absolute top-0 left-0 w-2 h-full transition-colors duration-300 ${feedbackState === 'idle' ? 'bg-indigo-500' :
           feedbackState === 'correct' ? 'bg-green-500' : 'bg-red-500'
           }`}></div>
-
-        <div className="mb-3 md:mb-6 text-sm bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 inline-block px-3 py-1 rounded-full font-medium transition-colors">
-          İpucu: {question.hint}
-        </div>
 
         <form onSubmit={handleSubmit} className="text-xl md:text-3xl leading-relaxed text-slate-800 dark:text-slate-100 font-medium transition-colors">
           <span>{question.preGap} </span>

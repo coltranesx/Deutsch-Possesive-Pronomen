@@ -12,6 +12,7 @@ export const ResultScreen: React.FC = () => {
   const totalQuestions = questions.length;
   const correctCount = history.filter(h => h.isCorrect).length;
   const incorrectCount = totalQuestions - correctCount;
+  const hintCount = history.filter(h => h.hintsUsed?.hint1 || h.hintsUsed?.hint2).length;
 
   const data = [
     { name: 'Doğru', value: correctCount },
@@ -26,7 +27,7 @@ export const ResultScreen: React.FC = () => {
       <p className="text-slate-500 dark:text-slate-400 text-center mb-8 transition-colors">Harika bir pratikti! İşte istatistiklerin.</p>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm text-center border border-slate-100 dark:border-slate-700 transition-colors">
           <div className="text-sm text-slate-500 dark:text-slate-400 uppercase font-semibold">Toplam Puan</div>
           <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{score}</div>
@@ -63,6 +64,11 @@ export const ResultScreen: React.FC = () => {
             <div className="flex items-center gap-1 mt-1"><span className="w-2 h-2 rounded-full bg-red-400"></span> {incorrectCount} Yanlış</div>
           </div>
         </div>
+        <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-sm text-center border border-slate-100 dark:border-slate-700 transition-colors">
+          <div className="text-xs md:text-sm text-slate-500 dark:text-slate-400 uppercase font-semibold">İpucu Kullanımı</div>
+          <div className="text-2xl md:text-4xl font-bold text-amber-500">{hintCount} <span className="text-slate-400 text-sm md:text-lg">/ {totalQuestions}</span></div>
+          <div className="text-[10px] md:text-xs text-slate-400 mt-1">Soru başına maliyet: -3p</div>
+        </div>
       </div>
 
       {/* Analysis Report */}
@@ -81,6 +87,7 @@ export const ResultScreen: React.FC = () => {
                   <th className="p-4 font-semibold">Soru</th>
                   <th className="p-4 font-semibold">Senin Cevabın</th>
                   <th className="p-4 font-semibold">Doğru Cevap</th>
+                  <th className="p-4 font-semibold text-center">İpucu</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700 text-sm transition-colors">
@@ -104,6 +111,13 @@ export const ResultScreen: React.FC = () => {
                     </td>
                     <td className="p-4 text-slate-800 dark:text-slate-200 font-bold transition-colors">
                       {record.question.answer}
+                    </td>
+                    <td className="p-4 text-center">
+                      <div className="flex justify-center gap-1">
+                        {record.hintsUsed?.hint1 && <span title="İpucu 1 kullanıldı">💡</span>}
+                        {record.hintsUsed?.hint2 && <span title="İpucu 2 kullanıldı">🔍</span>}
+                        {!record.hintsUsed?.hint1 && !record.hintsUsed?.hint2 && <span className="text-slate-300 dark:text-slate-600">—</span>}
+                      </div>
                     </td>
                   </tr>
                 ))}

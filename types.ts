@@ -4,7 +4,8 @@ export interface Question {
   postGap: string;   // Text after the input
   answer: string;    // The correct word (possessive pronoun or preposition)
   translation: string; // Turkish translation for context
-  hint?: string;     // Optional hint (e.g., "Nom. ich" or "aus + Dativ")
+  hint1?: string;    // Dilbilgisi çekimi ipucu (Kasus/Deklination bilgisi)
+  hint2?: string;    // İçerik/Kullanım ipucu (Fiil, Sıfat, Bağlam)
 }
 
 export interface AnswerRecord {
@@ -12,6 +13,7 @@ export interface AnswerRecord {
   question: Question;
   userInput: string;
   isCorrect: boolean;
+  hintsUsed: { hint1: boolean; hint2: boolean };
 }
 
 export enum GameState {

@@ -79,9 +79,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     Mecburi Çıktı Formatı (SADECE JSON):
     1. Boşluk olan yer iyelik zamiri, edat veya sıfat çekimi olmalı.
     2. Türkçe çevirisini ekle.
-    3. İpucu mutlaka Kasus belirtmeli.
+    3. İpucu alanları:
+       - "hint1": Sadece Kasus veya çekim tipi (Örn: "Akkusativ", "Dativ", "Weak - Nom - masc")
+       - "hint2": Hangi kelimeyle ilişkili olduğu (Örn: "Zamir: ich", "Fiil: helfen + Dativ", "Sıfat: gut")
     
-    JSON Liste (Array) olarak ver: [{"id": 1, "preGap": "Das ist ", "postGap": " Buch.", "answer": "mein", "translation": "Bu benim kitabım.", "hint": "ich (Nominativ)"}]
+    JSON Liste (Array) olarak ver: [{"id": 1, "preGap": "Das ist ", "postGap": " Buch.", "answer": "mein", "translation": "Bu benim kitabım.", "hint1": "Nominativ", "hint2": "Zamir: ich"}]
     Not: Markdown backticks (\`\`\`) veya açıklama istemiyorum. SADECE saf JSON.
   `;
 

@@ -12,6 +12,7 @@ interface QuizState {
     selectedTopic: TopicId;
     gameState: GameState;
     error: string | null;
+    currentHintsUsed: { hint1: boolean; hint2: boolean }; // YENİ
 
     actions: {
         startGame: () => Promise<void>;
@@ -20,6 +21,7 @@ interface QuizState {
         nextQuestion: () => void;
         setLevel: (level: UserLevel) => void;
         setTopic: (topic: TopicId) => void;
+        useHint: (hintType: 1 | 2) => void; // YENİ
     };
 }
 
@@ -34,6 +36,7 @@ export const useQuizStore = create<QuizState>()(
             selectedTopic: 'possessivpronomen', // Default topic
             gameState: GameState.IDLE,
             error: null,
+            currentHintsUsed: { hint1: false, hint2: false },
 
             actions: {
                 startGame: async () => {
@@ -46,7 +49,8 @@ export const useQuizStore = create<QuizState>()(
                             currentQuestionIndex: 0,
                             score: 0,
                             history: [],
-                            gameState: GameState.PLAYING
+                            gameState: GameState.PLAYING,
+                            currentHintsUsed: { hint1: false, hint2: false },
                         });
                     } catch (e) {
                         set({ error: "Sorular yüklenirken bir sorun oluştu.", gameState: GameState.IDLE });
@@ -58,7 +62,8 @@ export const useQuizStore = create<QuizState>()(
                         questions: [],
                         score: 0,
                         history: [],
-                        currentQuestionIndex: 0
+                        currentQuestionIndex: 0,
+                        currentHintsUsed: { hint1: false, hint2: false },
                     });
                 },
                 recordAnswer: (userAnswer: string) => {
@@ -76,20 +81,39 @@ export const useQuizStore = create<QuizState>()(
                             questionId: currentQuestion.id,
                             question: currentQuestion,
                             userInput: userAnswer,
-                            isCorrect
+                            isCorrect,
+                            hintsUsed: { ...state.currentHintsUsed }
                         }]
                     }));
                 },
                 nextQuestion: () => {
                     const { currentQuestionIndex, questions } = get();
                     if (currentQuestionIndex + 1 < questions.length) {
-                        set({ currentQuestionIndex: currentQuestionIndex + 1 });
+                        set({ 
+                            currentQuestionIndex: currentQuestionIndex + 1,
+                            currentHintsUsed: { hint1: false, hint2: false } 
+                        });
                     } else {
                         set({ gameState: GameState.FINISHED });
                     }
                 },
                 setLevel: (level: UserLevel) => set({ userLevel: level }),
                 setTopic: (topic: TopicId) => set({ selectedTopic: topic }),
+                useHint: (hintType: 1 | 2) => {
+                    const { currentHintsUsed } = get();
+                    const key = hintType === 1 ? 'hint1' : 'hint2';
+
+                    // Zaten açılmışsa tekrar puan düşürme
+                    if (currentHintsUsed[key]) return;
+
+                    set(state => ({
+                        score: state.score - 3,
+                        currentHintsUsed: {
+                            ...state.currentHintsUsed,
+                            [key]: true,
+                        },
+                    }));
+                },
             }
         }),
         {
